@@ -1,7 +1,7 @@
-# pipeline_b_trafilatura.py
+# pipeline_b_trafilatura.py (fixed)
 import time, json, re
 import trafilatura
-from trafilatura.sitemaps import sitemap_search
+from trafilatura import sitemaps
 
 SEEDS = ["https://www.jio.com/business/"]
 
@@ -12,10 +12,12 @@ def crawl(urls, max_pages=200):
     seen, results = set(), []
     t0 = time.time()
     for url in urls:
-        # discover from sitemap if available
-        for sm_url in sitemap_search(url):
-            sm_urls = trafilatura.sitemaps.sitemap_urls_from_robots(sm_url) or []
-            for u in sm_urls:
+        # discover sitemap URLs
+        sitemap_list = sitemaps.sitemap_search(url) or []
+        for sm_url in sitemap_list:
+            # extract page URLs from sitemap
+            page_urls = sitemaps.sitemap_urls(sm_url) or []
+            for u in page_urls:
                 if len(results) >= max_pages: break
                 if u in seen: continue
                 seen.add(u)
@@ -28,7 +30,7 @@ def crawl(urls, max_pages=200):
                     results.append({"url": u, "status": 200, "error": "no_main_content", "tokens": 0, "noise_ratio": None})
                     continue
                 tokens = tokenize(extracted)
-                # Fake a noise metric: 1 - (extracted/raw) length ratio
+                # Fake noise metric: 1 - (extracted/raw) ratio
                 noise_ratio = 1 - (len(extracted)/len(downloaded))
                 results.append({"url": u, "status": 200, "tokens": tokens, "noise_ratio": round(noise_ratio,3)})
     elapsed = time.time() - t0

@@ -95,7 +95,8 @@ if __name__ == "__main__":
             "pages_total": res["pages_total"],
             "pages_ok": res["pages_ok"],
             "tokens_total": res["tokens_total"],
-            "avg_noise_ratio": res["avg_noise_ratio"],
+
+           "avg_noise_ratio": res["avg_noise_ratio"],
             "throughput_pages_per_sec": res["throughput_pages_per_sec"],
             "top_failures": summarize_failures(res.get("failures",[]))
         })
